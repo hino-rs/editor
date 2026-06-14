@@ -1,7 +1,13 @@
+const runButton = document.getElementById("run");
+
 class App {
     constructor() {
         this.python = null;
         this.editor = null;
+        this.output = "";
+        this.errOutput = "";
+        this.status = document.getElementById("status");
+        this.result = document.getElementById('result');
     }
 
     async init() {
@@ -9,23 +15,39 @@ class App {
         await this.initEditor();
     }
 
+    outputClear() {
+        this.output = "";
+        this.errOutput = "";
+    }
+
+    writeOutput(output) {
+        this.result.innerText = output;
+    }
+
+    ready() {
+        this.status.innerText = "準備完了";
+    }
+
+    // pyodide初期化
+    // loadPyodide { stdout }で標準入力受け取る
     async initPython() {
         try {
             this.python = await loadPyodide({
-                stdout: (out) => console.log(`>> ${out}`),
-                stderr: (out) => console.log(`>> ${out}`)
+                stdout: (out) => {this.output = out; console.log(`>> ${out}`)},
+                stderr: (out) => {this.errOutput = out; console.log(`>> ${out}`)}
             });
         } catch(e) {
             console.error(e);
         }
     }
 
+    // monaco初期化
     initEditor() {
         return new Promise((resolve) => {
             require.config({ paths: { vs: "./node_modules/monaco-editor/min/vs" } });
             require(["vs/editor/editor.main"], () => {
                 this.editor = monaco.editor.create(
-                    document.getElementById("container"),
+                    document.getElementById("code-editor"),
                     {
                         value: '',
                         language: "python",
@@ -38,6 +60,7 @@ class App {
         });
     }
 
+    // Python実行
     run() {
         if (!this.editor || !this.python) {
             console.warn("準備ができていません")
@@ -48,16 +71,15 @@ class App {
     }
 }
 
-const status = document.getElementById("status");
-const terminal = document.getElementById('terminal');
-const runButton = document.getElementById("run");
-
 async function main() {
     let app = new App();
     try {
         await app.init();
-        runButton.addEventListener('click', () => app.run());
-        if (status) status.innerText = "準備完了"
+        app.ready();
+        runButton.addEventListener('click', () => {
+            app.run()
+            app.writeOutput(app.output);
+        });
     } catch(e) {
         console.error(e);
     }
