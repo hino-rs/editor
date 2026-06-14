@@ -72,18 +72,28 @@ class App {
     }
 
     markdown() {
-            console.log(this.editor);
         if (this.editor) {
-            // this.editor.onDidChangeModelContent((event) => {
-                const code = this.editor.getValue();
-                console.log(code);
-                const htmlContent = micromark(code, {
-                    extentions: [gfmTable()],
-                    htmlExtentions: [gfmTable()]
-                });
-                result.innerHTML = htmlContent;
-            // });
+            this.editor.onDidChangeModelContent((event) => {
+                this.writeMarkdown();
+                // const code = this.editor.getValue();
+                // console.log(code);
+                // const htmlContent = micromark(code, {
+                //     extentions: [gfmTable()],
+                //     htmlExtentions: [gfmTable()]
+                // });
+                // result.innerHTML = htmlContent;
+            });
         }
+    }
+
+    writeMarkdown() {
+        const code = this.editor.getValue();
+        console.log(code);
+        const htmlContent = micromark(code, {
+            extentions: [gfmTable()],
+            htmlExtentions: [gfmTable()]
+        });
+        result.innerHTML = htmlContent;
     }
 
     // Python実行
@@ -106,10 +116,10 @@ async function main() {
         switch (app.mode) {
             case 'markdown':
                 if (app.editor) {
-                    app.markdown();
+                    app.writeMarkdown();
                 }
                 runButton.addEventListener('click', () => {
-                    app.markdown()
+                    app.markdown();
                     // app.writeOutput(app.output);
                     console.log(result.innerHTML);
                 });
