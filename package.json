@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "micromark": "^4.0.2",
-    "monaco-editor": "^0.53.0"
+    "monaco-editor": "^0.53.0",
+    "monaco-themes": "^0.4.8"
   }
 }

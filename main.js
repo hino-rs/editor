@@ -1,18 +1,29 @@
 import { micromark } from 'https://esm.sh/micromark@4?bundle';
 import { gfmTable, gfmTableHtml } from 'https://esm.sh/micromark-extension-gfm-table@2?bundle';
+import { parseTmTheme } from 'https://esm.sh/monaco-themes';
+
+const languages = {
+    "Markdown": "markdown",
+    "Python3": "python",
+};
+
+const themes = [
+    "vs",
+    "vs-light",
+    "vs-dark",
+    "hc-white",
+    "hc-black",
+];
 
 const runButton = document.getElementById("run");
 const result = document.getElementById("result");
 const status = document.getElementById("status");
-
-const mode = Object.freeze({
-    1: 'markdown',
-    2: 'python',
-})
+const languagesSelector = document.getElementById("languages");
+const themesSelector = document.getElementById("themes");
 
 class App {
     constructor() {
-        this.mode = mode[1];
+        this.language = "markdown"
         this.python = null;
         this.editor = null;
         this.output = "";
@@ -20,10 +31,22 @@ class App {
     }
 
     async init() {
+        this.setOptions();
         let initialValue = (await (await fetch('welcome.md')).text()).toString();
         await this.initEditor(initialValue);
         await this.initPython();
         this.markdown();
+        this.bootSelector();
+    }
+
+    setOptions() {
+        for (const language in languages) {
+            languagesSelector.innerHTML += `<option value="${languages[language]}">${language}</option>`;
+        }
+
+        for (const theme of themes) {
+            themesSelector.innerHTML += `<option value="${theme}">${theme}</option>`;
+        }
     }
 
     outputClear() {
@@ -33,10 +56,6 @@ class App {
 
     writeOutput(output) {
         result.innerText = output;
-    }
-
-    ready() {
-        status.innerText = "準備完了";
     }
 
     // pyodide初期化
@@ -75,20 +94,12 @@ class App {
         if (this.editor) {
             this.editor.onDidChangeModelContent((event) => {
                 this.writeMarkdown();
-                // const code = this.editor.getValue();
-                // console.log(code);
-                // const htmlContent = micromark(code, {
-                //     extentions: [gfmTable()],
-                //     htmlExtentions: [gfmTable()]
-                // });
-                // result.innerHTML = htmlContent;
             });
         }
     }
 
     writeMarkdown() {
         const code = this.editor.getValue();
-        console.log(code);
         const htmlContent = micromark(code, {
             extentions: [gfmTable()],
             htmlExtentions: [gfmTable()]
@@ -105,34 +116,43 @@ class App {
         const code = this.editor.getValue();
         this.python.runPython(code);
     }
+
+    bootSelector() {
+        languagesSelector.addEventListener('change', (event) => {
+            let afterLanguage = event.target.value;
+            monaco.editor.setModelLanguage(this.editor.getModel(), event.target.value);
+            this.language = afterLanguage;
+
+            if (afterLanguage === 'python') {
+                
+            }
+        });
+
+        themesSelector.addEventListener('change', (event) => {
+            monaco.editor.setTheme(event.target.value);
+        });
+    }    
 }
 
 async function main() {
     let app = new App();
     try {
         await app.init();
-        app.ready();
+        status.innerText = "準備完了";
+        app.bootSelector();
 
-        switch (app.mode) {
-            case 'markdown':
-                if (app.editor) {
-                    app.writeMarkdown();
-                }
-                runButton.addEventListener('click', () => {
-                    app.markdown();
-                    // app.writeOutput(app.output);
-                    console.log(result.innerHTML);
-                });
-                break;
-            case 'python':
-                runButton.addEventListener('click', () => {
-                    app.run()
-                    app.writeOutput(app.output);
-                });
-                break;
-            default:
-                console.error("非対応のモード");
+        if (app.editor) {
+            app.writeMarkdown();
         }
+
+        runButton.addEventListener('click', () => {
+            if (app.language === 'markdown') {
+                app.markdown();
+            } else {
+                app.run()
+                app.writeOutput(app.output);
+            }
+        });
     } catch(e) {
         console.error(e);
     }

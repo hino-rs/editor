@@ -4,3 +4,4 @@
 - [pyodide stdout](https://qiita.com/yonaka15/items/7bb8088f89c31feea32c)
 - https://memory-lovers.blog/entry/2022/06/01/150000
 - https://zenn.dev/tetsuyaohira/articles/53bcc378581d2f
+- https://qiita.com/lumis/items/311b8c39d61312957195
