@@ -8,10 +8,8 @@ const languages = {
 };
 
 const themes = [
-    "vs",
     "vs-light",
     "vs-dark",
-    "hc-white",
     "hc-black",
 ];
 
@@ -31,12 +29,16 @@ class App {
     }
 
     async init() {
-        this.setOptions();
-        let initialValue = (await (await fetch('welcome.md')).text()).toString();
-        await this.initEditor(initialValue);
-        await this.initPython();
-        this.markdown();
-        this.bootSelector();
+        try {
+            this.setOptions();
+            let initialValue = (await (await fetch('welcome.md')).text()).toString();
+            await this.initEditor(initialValue);
+            await this.initPython();
+            this.markdown();
+            this.bootSelector();
+        } catch (e) {
+            location.reload();
+        }
     }
 
     setOptions() {
@@ -124,7 +126,7 @@ class App {
             this.language = afterLanguage;
 
             if (afterLanguage === 'python') {
-                
+
             }
         });
 
