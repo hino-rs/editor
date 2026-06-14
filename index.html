@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="https://cdn.jsdelivr.net/pyodide/v314.0.0/full/pyodide.js"></script>
+  </head>
+  <body>
+    <div id="status">準備中</div>
+
+    <!-- <div id="editor">
+      <input type="text" id="code" />
+    </div> -->
+
+    <div
+      id="container"
+      style="width: 800px; height: 600px; border: 1px solid grey;"
+    >
+    </div>
+
+    <button id="run">do</button>
+
+    <textarea id="terminal"></textarea>
+    
+    <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
