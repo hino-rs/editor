@@ -33,8 +33,8 @@ class App {
     async initPython() {
         try {
             this.python = await loadPyodide({
-                stdout: (out) => {this.output = out; console.log(`>> ${out}`)},
-                stderr: (out) => {this.errOutput = out; console.log(`>> ${out}`)}
+                stdout: (out) => {this.output += out+"\n"; console.log(`>> ${out}`)},
+                stderr: (out) => {this.errOutput =+ out+"\n"; console.log(`>> ${out}`)}
             });
         } catch(e) {
             console.error(e);
