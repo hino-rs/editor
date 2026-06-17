@@ -22,12 +22,18 @@ const themesSelector = document.getElementById("themes");
 // unwrap_or的な
 function jsonGetSafety(json, key, defaultData, ideals) {
     const value = json[key];
-    if (value === undefined || !(value in ideals)) {
+
+    if (ideals === undefined) {
+        return defaultData;
+    }
+
+    if (value === undefined || !(ideals.includes(value))) {
         return defaultData;
     } else {
         return value;
     }
 }
+
 
 
 class App {
@@ -45,11 +51,18 @@ class App {
 
     async init() {
         try {
+            let files = await fetch('files');
             let config = await this.loadConfig()
             config = await config.json();
             console.log(config);
             this.setOptions();
-            let initialValue = (await (await fetch('welcome.md')).text()).toString();
+            let currentFile = jsonGetSafety(config, "currentFile", "welcome.md");
+            if (currentFile === '') { currentFile = 'welcome.md' }
+            let initialValue = (await (await fetch(currentFile)).text()).toString();
+            if (!initialValue) {
+                initialValue = (await (await fetch("welcome.md")).text()).toString();
+            }
+            
             await this.initEditor(initialValue, config);
             await this.initPython();
             this.markdown();
@@ -94,6 +107,11 @@ class App {
 
     // monaco初期化
     async initEditor(initialValue, config) {
+        const theme = jsonGetSafety(config, "theme", "vs", ["vs", "vs-dark", "hc-black"]);
+        const language = jsonGetSafety(config, "language", "markdown", ["python", "markdown"]);
+
+        console.log(theme, language)
+
         return new Promise((resolve, reject) => {
             require.config({ paths: { vs: "./node_modules/monaco-editor/min/vs" } });
             require(["vs/editor/editor.main"], () => {
@@ -101,10 +119,8 @@ class App {
                     document.getElementById("code-editor"),
                     {
                         value: initialValue,
-                        // language: "markdown",
-                        language: jsonGetSafety(config, "language", "markdown", ["python", "markdown"]),
-                        // theme: "vs-dark",
-                        theme: jsonGetSafety(config, "theme", "vs", ["vs", "vs-dark", "hc-black"]),
+                        language: language,
+                        theme: theme,
                         automaticLayout: true
                     }
                 );
