@@ -10,23 +10,28 @@ const languages = {
 };
 
 const colorPaletteLight = {
-    "headerBg": "#FFFFFF",
-    "headerText": "#FFFFFF",
-    "resultBg": "#FFFFFF",
-    "resultText": "#FFFFFF",
-    "buttonBg": "#FFFFFF",
-    "buttonBorder": "#FFFFFF",
+    "headerBg": "#a99985",
+    "headerText": "#252323",
+    "resultBg": "#f5f1ed",
+    "resultText": "#252323",
+    "buttonBg": "#dad2bc",
+    "buttonBorder": "#a99985",
+    "inputSelectBg": "#555353",
+    "inputSelectText": "#f5f1ed",
 }
-
+// 252323-70798c-f5f1ed-dad2bc-a99985
 const colorPaletteDark = {
-    "headerBg": "#000000",
-    "headerText": "#000000",
-    "resultBg": "#000000",
-    "resultText": "#000000",
-    "buttonBg": "#000000",
-    "buttonBorder": "#000000",
+    "headerBg": "#675e54",
+    "headerText": "#252323",
+    "resultBg": "#252323",
+    "resultText": "#f5f1ed",
+    "buttonBg": "#dad2bc",
+    "buttonBorder": "#a99985",
+    "inputSelectBg": "#f5f1ed",
+    "inputSelectText": "#555353",
 }
 
+const title             = document.getElementById("title");
 const runButton         = document.getElementById("run");
 const result            = document.getElementById("result");
 const languagesSelector = document.getElementById("languages");
@@ -36,6 +41,9 @@ const downloadButton    = document.getElementById('download');
 const searchButton      = document.getElementById('search');
 const header            = document.getElementById('header');
 const preparation       = document.getElementById('preparation');
+const allButtons        = document.querySelectorAll('button');
+const allSelects        = document.querySelectorAll('select');
+const allInputs         = document.querySelectorAll('input');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -81,7 +89,7 @@ class App {
             config = await config.json();
             
             // // リザルト画面のテーマ適用
-            this.setResultTheme(jsonGetSafety(config, "theme", "dark", ["light", "dark"]));
+            this.setTheme(jsonGetSafety(config, "theme", "dark", ["light", "dark"]));
 
             // テーマ・言語セレクターをセット
             this.setOptions();
@@ -125,16 +133,56 @@ class App {
         result.innerText = output;
     }
 
-    setResultTheme(after) {
-        let bgColor = "#F0F0E0";
-        let textColor = "#303030";
+    setTheme(after) {
+        let titleColor;
+        let headerBg;
+        let headerText;
+        let resultBg;
+        let resultText;
+        let buttonBg;
+        let buttonBorder;
+        let inputSelectBg;
+        let inputSelectText;
 
-        if (after === "dark") {
-            [bgColor, textColor] = [textColor, bgColor];
+        if (after === "light") {
+            titleColor = "black";
+            headerBg = colorPaletteLight["headerBg"];
+            headerText = colorPaletteLight["headerText"];
+            resultBg = colorPaletteLight["resultBg"];
+            resultText = colorPaletteLight["resultText"];
+            buttonBg = colorPaletteLight["buttonBg"];
+            buttonBorder = colorPaletteLight["buttonBorder"];
+            inputSelectBg = colorPaletteLight["inputSelectBg"];
+            inputSelectText = colorPaletteLight["inputSelectText"];
+        } else {
+            titleColor = "white";
+            headerBg = colorPaletteDark["headerBg"];
+            headerText = colorPaletteDark["headerText"];
+            resultBg = colorPaletteDark["resultBg"];
+            resultText = colorPaletteDark["resultText"];
+            buttonBg = colorPaletteDark["buttonBg"];
+            buttonBorder = colorPaletteDark["buttonBorder"];
+            inputSelectBg = colorPaletteDark["inputSelectBg"];
+            inputSelectText = colorPaletteDark["inputSelectText"];
         }
 
-        result.style.setProperty("background-color", bgColor);
-        result.style.setProperty("color", textColor);
+        title.style.color = titleColor;
+        header.style.backgroundColor = headerBg;
+        header.style.color = resultText;
+        result.style.backgroundColor = resultBg;
+        result.style.color = resultText;
+        allButtons.forEach(button => {
+            button.style.backgroundColor = buttonBg;
+            button.style.borderColor = buttonBorder;
+        });
+        allSelects.forEach(select => {
+            select.style.backgroundColor = inputSelectBg;
+            select.style.color = inputSelectText;
+        });
+        allInputs.forEach(input => {
+            input.style.backgroundColor = inputSelectBg;
+            input.style.color = inputSelectText;
+        });
     }
 
     // pyodide初期化
@@ -213,11 +261,9 @@ class App {
         });
 
         themeSelector.addEventListener('change', (event) => {
-            console.log(event.target.value);
-
             let after = event.target.value;
 
-            this.setResultTheme(after);
+            this.setTheme(after);
 
             if (after === "dark") {
                 monaco.editor.setTheme("vs-dark");

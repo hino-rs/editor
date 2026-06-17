@@ -38,7 +38,7 @@ html, body {
 header {
   background-color: rgb(200, 200, 200);
   height: 7%;
-  border-bottom: black 1px solid;
+  border-bottom: #70798c 1px solid;
   border-radius: 0 0 1% 1%;
   padding: 0 1rem 0 1rem;
   
@@ -58,6 +58,9 @@ main {
   font-size: 1.5rem;
   font-weight: bold;
   margin-right: auto;
+  color: black;
+  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-color: #70798c;
 }
 
 #code-editor {
@@ -70,5 +73,6 @@ main {
   overflow: auto;
   background-color: #F0F0E0;
   color: #303030;
+  border-left: 1px #70798c solid;
+  padding: 1rem;
 }
-
