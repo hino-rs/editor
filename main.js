@@ -27,8 +27,12 @@ function jsonGetSafety(json, key, defaultData, ideals) {
         return defaultData;
     }
 
-    if (value === undefined || !(ideals.includes(value))) {
-        return defaultData;
+    if (ideals !== 'any') {
+        if (value === undefined || !(ideals.includes(value))) {
+            return defaultData;
+        } else {
+            return value;
+        }
     } else {
         return value;
     }
@@ -56,11 +60,15 @@ class App {
             config = await config.json();
             console.log(config);
             this.setOptions();
-            let currentFile = jsonGetSafety(config, "currentFile", "welcome.md");
-            if (currentFile === '') { currentFile = 'welcome.md' }
-            let initialValue = (await (await fetch(currentFile)).text()).toString();
+
+            let currentFile = jsonGetSafety(config, "currentFile", "/files/welcome.md", 'any');
+            if (currentFile === '') { currentFile = '/files/welcome.md' }
+            console.log(currentFile);
+            const filePath = '/files/'+currentFile;
+            console.log(filePath);
+            let initialValue = (await (await fetch(filePath)).text(filePath)).toString();
             if (!initialValue) {
-                initialValue = (await (await fetch("welcome.md")).text()).toString();
+                initialValue = (await (await fetch("/files/welcome.md")).text()).toString();
             }
             
             await this.initEditor(initialValue, config);
