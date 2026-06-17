@@ -46,6 +46,7 @@ const preparation       = document.getElementById('preparation');
 const allButtons        = document.querySelectorAll('button');
 const allSelects        = document.querySelectorAll('select');
 const allInputs         = document.querySelectorAll('input');
+const filesSelector     = document.getElementById('files');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -85,8 +86,23 @@ class App {
         return await fetch('config.json');
     }
 
+    // 登録ファイル読み込み
+    async loadFiles() {
+        let files = await fetch('/files/list.json');
+        files = await files.json();
+        files = JSON.stringify(files);
+        files = JSON.parse(files);
+
+        for (let i = 0; i < files.length; i++) {
+            filesSelector.innerHTML += `<option value="${files[i]}">${files[i]}<option>`
+        }
+    }
+
     async init() {
         try {
+            // 登録ファイル読み込みとセレクタ作成
+            await this.loadFiles();
+
             // コンフィグ読み込み
             let config = await this.loadConfig()
             config = await config.json();
@@ -213,8 +229,6 @@ class App {
     async initEditor(initialValue, config) {
         const theme = jsonGetSafety(config, "theme", "dark", ["light", "dark"]);
         const language = jsonGetSafety(config, "language", "markdown", ["python", "markdown"]);
-        
-        console.log(theme, language)
 
         return new Promise((resolve, reject) => {
             require.config({ paths: { vs: "./node_modules/monaco-editor/min/vs" } });
