@@ -5,3 +5,5 @@
 - https://memory-lovers.blog/entry/2022/06/01/150000
 - https://zenn.dev/tetsuyaohira/articles/53bcc378581d2f
 - https://qiita.com/lumis/items/311b8c39d61312957195
+- https://into-the-program.com/javascript-click-button-download-file/
+- https://madogiwa0124.hatenablog.com/entry/2019/02/19/000428

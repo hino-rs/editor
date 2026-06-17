@@ -88,8 +88,8 @@ class App {
             
             // 変更監視とHTML変換起動
             this.markdown();
-            // セレクター監視起動
-            this.bootSelector();
+            // 操作系の監視起動
+            this.bootController();
 
             status.innerText = "準備完了";
         } catch (e) {
@@ -181,7 +181,7 @@ class App {
         this.python.runPython(code);
     }
 
-    bootSelector() {
+    bootController() {
         languagesSelector.addEventListener('change', (event) => {
             let afterLanguage = event.target.value;
             monaco.editor.setModelLanguage(this.editor.getModel(), event.target.value);
@@ -195,14 +195,48 @@ class App {
         themesSelector.addEventListener('change', (event) => {
             monaco.editor.setTheme(event.target.value);
         });
+
+        exportButton.addEventListener('click', () => {
+            this.export();
+        });
+
+        saveButton.addEventListener('click', () => {
+            this.save();
+        })
     }    
+
+    save() {
+        // TODO
+    }
+
+    export() {
+        const outFileName = fileName.value;
+        const code = this.editor.getValue();
+
+        if (!(outFileName.includes('.py') || outFileName.includes('.md'))) {
+            console.log("ファイル拡張子は .pyか.mdにしてください");
+            return;
+        }
+        
+        let blob;
+        if (outFileName.includes('.md')) {
+            blob = new Blob([code], { 'type': 'text/plain' })
+        } else {
+            blob = new Blob([code], { 'type': 'text/plain' });
+        }
+
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = outFileName;
+        link.click();
+    }
 }
 
 async function main() {
     let app = new App();
     try {
         await app.init();
-        app.bootSelector();
+        app.bootController();
 
         // 初期値ではonDidChangeModelContentが走らないので
         if (app.editor) {
