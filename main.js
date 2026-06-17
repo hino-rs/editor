@@ -18,9 +18,17 @@ const result = document.getElementById("result");
 const status = document.getElementById("status");
 const languagesSelector = document.getElementById("languages");
 const themesSelector = document.getElementById("themes");
+const fileName = document.getElementById('fileName');
+const exportButton = document.getElementById('export');
+const saveButton = document.getElementById('save');
 
 // unwrap_or的な
-function jsonGetSafety(json, key, defaultData, ideals) {
+function jsonGetSafety(
+    json,        // もと
+    key,         // キー
+    defaultData, // キーがjsonに無かった場合の値
+    ideals,      // 期待する値の配列 もしくは 'any'で期待値指定なし
+) {
     const value = json[key];
 
     if (ideals === undefined) {
@@ -42,7 +50,7 @@ function jsonGetSafety(json, key, defaultData, ideals) {
 
 class App {
     constructor() {
-        this.language = "markdown"
+        this.language = ""
         this.python = null;
         this.editor = null;
         this.output = "";
@@ -55,26 +63,35 @@ class App {
 
     async init() {
         try {
-            let files = await fetch('files');
+            // コンフィグ読み込み
             let config = await this.loadConfig()
             config = await config.json();
-            console.log(config);
+            
+            // テーマ・言語セレクターをセット
             this.setOptions();
 
+            // コンフィグから最新のファイル名を取得
             let currentFile = jsonGetSafety(config, "currentFile", "/files/welcome.md", 'any');
-            if (currentFile === '') { currentFile = '/files/welcome.md' }
-            console.log(currentFile);
+            // もし無名だったら、もしくは拡張子が誤っていたらwelcomeドキュメントに
+            if (currentFile === '' || !currentFile.includes('.md') || !currentFile.includes('.py')) { currentFile = '/files/welcome.md' }
+            // フェッチできるようにパスへ変換
             const filePath = '/files/'+currentFile;
-            console.log(filePath);
+            // フェッチして文字列へ
             let initialValue = (await (await fetch(filePath)).text(filePath)).toString();
-            if (!initialValue) {
-                initialValue = (await (await fetch("/files/welcome.md")).text()).toString();
-            }
+            // もしファイルが見つからなかったらwelcomeドキュメントに
+            if (!initialValue) { initialValue = (await (await fetch("/files/welcome.md")).text()).toString(); }
             
+            // モナコエディタ初期化
             await this.initEditor(initialValue, config);
+            // pyodide初期化
             await this.initPython();
+            
+            // 変更監視とHTML変換起動
             this.markdown();
+            // セレクター監視起動
             this.bootSelector();
+
+            status.innerText = "準備完了";
         } catch (e) {
             // location.reload();
             console.error(e);
@@ -171,7 +188,7 @@ class App {
             this.language = afterLanguage;
 
             if (afterLanguage === 'python') {
-
+                // TODO
             }
         });
 
@@ -185,9 +202,9 @@ async function main() {
     let app = new App();
     try {
         await app.init();
-        status.innerText = "準備完了";
         app.bootSelector();
 
+        // 初期値ではonDidChangeModelContentが走らないので
         if (app.editor) {
             app.writeMarkdown();
         }
