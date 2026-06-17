@@ -7,3 +7,4 @@
 - https://qiita.com/lumis/items/311b8c39d61312957195
 - https://into-the-program.com/javascript-click-button-download-file/
 - https://madogiwa0124.hatenablog.com/entry/2019/02/19/000428
+- https://zenn.dev/reactance/articles/d805b61fd65177

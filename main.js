@@ -13,14 +13,15 @@ const themes = [
     "hc-black",
 ];
 
-const runButton = document.getElementById("run");
-const result = document.getElementById("result");
-const status = document.getElementById("status");
+const runButton         = document.getElementById("run");
+const result            = document.getElementById("result");
+const status            = document.getElementById("status");
 const languagesSelector = document.getElementById("languages");
-const themesSelector = document.getElementById("themes");
-const fileName = document.getElementById('fileName');
-const exportButton = document.getElementById('export');
-const saveButton = document.getElementById('save');
+const themesSelector    = document.getElementById("themes");
+const fileName          = document.getElementById('fileName');
+const exportButton      = document.getElementById('export');
+const saveButton        = document.getElementById('save');
+const searchButton      = document.getElementById('search');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -46,8 +47,6 @@ function jsonGetSafety(
     }
 }
 
-
-
 class App {
     constructor() {
         this.language = ""
@@ -59,6 +58,38 @@ class App {
 
     async loadConfig() {
         return await fetch('config.json');
+    }
+
+    async searchFile() {
+        const currentFileName = fileName.value;
+        if (currentFileName === '' || currentFileName === undefined || currentFileName === null) {
+            alert("ファイル名が空です");
+            return;
+        }
+        try {
+            const res = fetch('/files/'+currentFileName);
+            res.then((res) => {
+                if (res.ok) {
+                    if (confirm("ファイルが見つかりました。開きますか？")) {
+                        console.log("開く");
+                    }
+                } else {
+                    alert("ファイルが見つかりませんでした");
+                }
+            });
+            // let result = await fetch('/files/'+currentFileName);
+            // console.log(result);
+            // if (result) {
+            //     if (confirm("ファイルが見つかりました。開きますか？")) {
+            //         console.log("開く");
+            //     }
+            // } else {
+            //     alert("ファイルが見つかりませんでした");
+            // }
+        } catch(e) {
+            console.log(e);
+            alert("検索に失敗しました: "+e);
+        }
     }
 
     async init() {
@@ -202,7 +233,11 @@ class App {
 
         saveButton.addEventListener('click', () => {
             this.save();
-        })
+        });
+
+        searchButton.addEventListener('click', async() => {
+            await this.searchFile();
+        });    
     }    
 
     save() {
