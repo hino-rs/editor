@@ -1,4 +1,4 @@
-import { micromark } from 'https://esm.sh/micromark@4?bundle';
+import { micromark } from 'https://esm.sh/micromark@3?bundle';
 import { gfmTable, gfmTableHtml } from 'https://esm.sh/micromark-extension-gfm-table@2?bundle';
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 
@@ -9,15 +9,33 @@ const languages = {
     "Python3": "python",
 };
 
+const colorPaletteLight = {
+    "headerBg": "#FFFFFF",
+    "headerText": "#FFFFFF",
+    "resultBg": "#FFFFFF",
+    "resultText": "#FFFFFF",
+    "buttonBg": "#FFFFFF",
+    "buttonBorder": "#FFFFFF",
+}
+
+const colorPaletteDark = {
+    "headerBg": "#000000",
+    "headerText": "#000000",
+    "resultBg": "#000000",
+    "resultText": "#000000",
+    "buttonBg": "#000000",
+    "buttonBorder": "#000000",
+}
+
 const runButton         = document.getElementById("run");
 const result            = document.getElementById("result");
-const status            = document.getElementById("status");
 const languagesSelector = document.getElementById("languages");
 const themeSelector     = document.getElementById("theme");
 const fileName          = document.getElementById('fileName');
 const downloadButton    = document.getElementById('download');
 const searchButton      = document.getElementById('search');
 const header            = document.getElementById('header');
+const preparation       = document.getElementById('preparation');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -86,8 +104,6 @@ class App {
             this.markdown();
             // 操作系の監視起動
             this.bootController();
-
-            status.innerText = "準備完了";
         } catch (e) {
             // location.reload();
             console.error(e);
@@ -232,6 +248,9 @@ async function main() {
         if (app.editor) {
             app.writeMarkdown();
         }
+
+        // ロードアニメーションを隠す
+        preparation.style.setProperty('display', 'none');
 
         runButton.addEventListener('click', () => {
             if (app.language === 'markdown') {

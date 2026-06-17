@@ -9,3 +9,5 @@
 - https://madogiwa0124.hatenablog.com/entry/2019/02/19/000428
 - https://zenn.dev/reactance/articles/d805b61fd65177
 - https://qiita.com/SeiuchiAzarashi/items/918daaa3aca55830ef32
+- https://office-obata.com/report/memorandum/post-5731/
+- https://css-loaders.com/spinner/
