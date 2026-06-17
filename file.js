@@ -26,26 +26,16 @@ export class File {
         }
     }
 
-    static export(outFileName, code) {
+    static download(outFileName, code) {
         if (!(outFileName.includes('.py') || outFileName.includes('.md'))) {
             console.log("ファイル拡張子は .pyか.mdにしてください");
             return;
         }
         
-        let blob;
-        if (outFileName.includes('.md')) {
-            blob = new Blob([code], { 'type': 'text/plain' })
-        } else {
-            blob = new Blob([code], { 'type': 'text/plain' });
-        }
-
+        const blob = new Blob([code], { 'type': 'text/plain' })
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.download = outFileName;
         link.click();
-    }
-
-    static save(fileName, code) {
-        // todo
     }
 }

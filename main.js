@@ -15,8 +15,7 @@ const status            = document.getElementById("status");
 const languagesSelector = document.getElementById("languages");
 const themeSelector     = document.getElementById("theme");
 const fileName          = document.getElementById('fileName');
-const exportButton      = document.getElementById('export');
-const saveButton        = document.getElementById('save');
+const downloadButton    = document.getElementById('download');
 const searchButton      = document.getElementById('search');
 const header            = document.getElementById('header');
 
@@ -211,14 +210,10 @@ class App {
             }
         });
 
-        exportButton.addEventListener('click', () => {
+        downloadButton.addEventListener('click', () => {
             const outFileName = fileName.value;
             const code = this.editor.getValue();
-            File.export(outFileName, code);
-        });
-
-        saveButton.addEventListener('click', () => {
-            File.save();
+            File.download(outFileName, code);
         });
 
         searchButton.addEventListener('click', async() => {
