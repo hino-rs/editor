@@ -9,6 +9,8 @@ html, body {
 header {
   background-color: rgb(200, 200, 200);
   height: 5%;
+  border-bottom: black 1px solid;
+  border-radius: 0 0 1% 1%;
 }
 
 main {

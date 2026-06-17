@@ -18,6 +18,7 @@ const fileName          = document.getElementById('fileName');
 const exportButton      = document.getElementById('export');
 const saveButton        = document.getElementById('save');
 const searchButton      = document.getElementById('search');
+const header            = document.getElementById('header');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -62,8 +63,8 @@ class App {
             let config = await this.loadConfig()
             config = await config.json();
             
-            // リザルト画面のテーマ適用
-            this.changeTheme(jsonGetSafety(config, "theme", "dark", ["light", "dark"]));
+            // // リザルト画面のテーマ適用
+            this.setResultTheme(jsonGetSafety(config, "theme", "dark", ["light", "dark"]));
 
             // テーマ・言語セレクターをセット
             this.setOptions();
@@ -107,6 +108,18 @@ class App {
 
     writeOutput(output) {
         result.innerText = output;
+    }
+
+    setResultTheme(after) {
+        let bgColor = "#F0F0E0";
+        let textColor = "#303030";
+
+        if (after === "dark") {
+            [bgColor, textColor] = [textColor, bgColor];
+        }
+
+        result.style.setProperty("background-color", bgColor);
+        result.style.setProperty("color", textColor);
     }
 
     // pyodide初期化
@@ -189,18 +202,13 @@ class App {
 
             let after = event.target.value;
 
-            let bgColor = "#F0F0E0";
-            let textColor = "#303030";
+            this.setResultTheme(after);
 
             if (after === "dark") {
-                [bgColor, textColor] = [textColor, bgColor];
                 monaco.editor.setTheme("vs-dark");
             } else {
                 monaco.editor.setTheme("vs");
             }
-
-            result.style.setProperty("background-color", bgColor);
-            result.style.setProperty("color", textColor);
         });
 
         exportButton.addEventListener('click', () => {
