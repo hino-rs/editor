@@ -25,4 +25,7 @@ main {
 #result {
   flex: 1;
   overflow: auto;
+  background-color: #F0F0E0;
+  color: #303030;
 }
+

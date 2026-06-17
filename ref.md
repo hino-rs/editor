@@ -8,3 +8,4 @@
 - https://into-the-program.com/javascript-click-button-download-file/
 - https://madogiwa0124.hatenablog.com/entry/2019/02/19/000428
 - https://zenn.dev/reactance/articles/d805b61fd65177
+- https://qiita.com/SeiuchiAzarashi/items/918daaa3aca55830ef32

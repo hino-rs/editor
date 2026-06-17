@@ -9,17 +9,11 @@ const languages = {
     "Python3": "python",
 };
 
-const themes = [
-    "vs",
-    "vs-dark",
-    "hc-black",
-];
-
 const runButton         = document.getElementById("run");
 const result            = document.getElementById("result");
 const status            = document.getElementById("status");
 const languagesSelector = document.getElementById("languages");
-const themesSelector    = document.getElementById("themes");
+const themeSelector     = document.getElementById("theme");
 const fileName          = document.getElementById('fileName');
 const exportButton      = document.getElementById('export');
 const saveButton        = document.getElementById('save');
@@ -68,6 +62,9 @@ class App {
             let config = await this.loadConfig()
             config = await config.json();
             
+            // リザルト画面のテーマ適用
+            this.changeTheme(jsonGetSafety(config, "theme", "dark", ["light", "dark"]));
+
             // テーマ・言語セレクターをセット
             this.setOptions();
 
@@ -101,10 +98,6 @@ class App {
         for (const language in languages) {
             languagesSelector.innerHTML += `<option value="${languages[language]}">${language}</option>`;
         }
-
-        for (const theme of themes) {
-            themesSelector.innerHTML += `<option value="${theme}">${theme}</option>`;
-        }
     }
 
     outputClear() {
@@ -131,9 +124,9 @@ class App {
 
     // monaco初期化
     async initEditor(initialValue, config) {
-        const theme = jsonGetSafety(config, "theme", "vs", ["vs", "vs-dark", "hc-black"]);
+        const theme = jsonGetSafety(config, "theme", "dark", ["light", "dark"]);
         const language = jsonGetSafety(config, "language", "markdown", ["python", "markdown"]);
-
+        
         console.log(theme, language)
 
         return new Promise((resolve, reject) => {
@@ -144,7 +137,7 @@ class App {
                     {
                         value: initialValue,
                         language: language,
-                        theme: theme,
+                        theme: (theme === "light") ? "vs" : "vs-dark",
                         automaticLayout: true
                     }
                 );
@@ -191,8 +184,23 @@ class App {
             }
         });
 
-        themesSelector.addEventListener('change', (event) => {
-            monaco.editor.setTheme(event.target.value);
+        themeSelector.addEventListener('change', (event) => {
+            console.log(event.target.value);
+
+            let after = event.target.value;
+
+            let bgColor = "#F0F0E0";
+            let textColor = "#303030";
+
+            if (after === "dark") {
+                [bgColor, textColor] = [textColor, bgColor];
+                monaco.editor.setTheme("vs-dark");
+            } else {
+                monaco.editor.setTheme("vs");
+            }
+
+            result.style.setProperty("background-color", bgColor);
+            result.style.setProperty("color", textColor);
         });
 
         exportButton.addEventListener('click', () => {
