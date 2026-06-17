@@ -69,9 +69,10 @@ class App {
         try {
             const res = fetch('/files/'+currentFileName);
             res.then((res) => {
+                console.log(res);
                 if (res.ok) {
                     if (confirm("ファイルが見つかりました。開きますか？")) {
-                        console.log("開く");
+                        this.open(currentFileName);
                     }
                 } else {
                     alert("ファイルが見つかりませんでした");
@@ -105,10 +106,8 @@ class App {
             let currentFile = jsonGetSafety(config, "currentFile", "/files/welcome.md", 'any');
             // もし無名だったら、もしくは拡張子が誤っていたらwelcomeドキュメントに
             if (currentFile === '' || !currentFile.includes('.md') || !currentFile.includes('.py')) { currentFile = '/files/welcome.md' }
-            // フェッチできるようにパスへ変換
-            const filePath = '/files/'+currentFile;
             // フェッチして文字列へ
-            let initialValue = (await (await fetch(filePath)).text(filePath)).toString();
+            let initialValue = (await (await fetch(currentFile)).text(currentFile)).toString();
             // もしファイルが見つからなかったらwelcomeドキュメントに
             if (!initialValue) { initialValue = (await (await fetch("/files/welcome.md")).text()).toString(); }
             
@@ -239,6 +238,20 @@ class App {
             await this.searchFile();
         });    
     }    
+
+    async open(file) {
+        let path = '/files/'+file;
+        let code = (await (await fetch(path)).text(path)).toString();
+
+        console.log(this.editor);
+        this.editor.setValue(code);
+        // const model = this.editor.getModel();
+        // editor.executeEdits('my-source', [{
+        //     range: model.getFullModelRange(),
+        //     text: code,
+        //     forceMoveMarkers: true
+        // }]);
+    }
 
     save() {
         // TODO
