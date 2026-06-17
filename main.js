@@ -1,8 +1,10 @@
 import { micromark } from 'https://esm.sh/micromark@3?bundle';
-import { gfmTable, gfmTableHtml } from 'https://esm.sh/micromark-extension-gfm-table@2?bundle';
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
+import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
+import katex from 'https://esm.sh/markdown-it-katex@2';
 
 import { File } from '/file.js';
+
 
 const languages = {
     "Markdown": "markdown",
@@ -76,6 +78,7 @@ class App {
         this.editor = null;
         this.output = "";
         this.errOutput = "";
+        this.md = null;
     }
 
     async loadConfig() {
@@ -108,6 +111,14 @@ class App {
             // pyodide初期化
             await this.initPython();
             
+            // markdown-it初期化
+            this.md = MarkdownIt({
+                breaks: true,
+                linkify: true
+            });
+
+            this.md.use(katex);
+
             // 変更監視とHTML変換起動
             this.markdown();
             // 操作系の監視起動
@@ -225,17 +236,14 @@ class App {
     markdown() {
         if (this.editor) {
             this.editor.onDidChangeModelContent((event) => {
-                this.writeMarkdown();
+                this.parseMarkdown();
             });
         }
     }
 
-    writeMarkdown() {
+    parseMarkdown() {
         const code = this.editor.getValue();
-        const htmlContent = micromark(code, {
-            extentions: [gfmTable()],
-            htmlExtentions: [gfmTable()]
-        });
+        const htmlContent = this.md.render(code);
         result.innerHTML = htmlContent;
     }
 
@@ -292,7 +300,7 @@ async function main() {
 
         // 初期値ではonDidChangeModelContentが走らないので
         if (app.editor) {
-            app.writeMarkdown();
+            app.parseMarkdown();
         }
 
         // ロードアニメーションを隠す
