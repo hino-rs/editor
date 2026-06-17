@@ -2,6 +2,8 @@ import { micromark } from 'https://esm.sh/micromark@4?bundle';
 import { gfmTable, gfmTableHtml } from 'https://esm.sh/micromark-extension-gfm-table@2?bundle';
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 
+import { File } from '/file.js';
+
 const languages = {
     "Markdown": "markdown",
     "Python3": "python",
@@ -58,39 +60,6 @@ class App {
 
     async loadConfig() {
         return await fetch('config.json');
-    }
-
-    async searchFile() {
-        const currentFileName = fileName.value;
-        if (currentFileName === '' || currentFileName === undefined || currentFileName === null) {
-            alert("ファイル名が空です");
-            return;
-        }
-        try {
-            const res = fetch('/files/'+currentFileName);
-            res.then((res) => {
-                console.log(res);
-                if (res.ok) {
-                    if (confirm("ファイルが見つかりました。開きますか？")) {
-                        this.open(currentFileName);
-                    }
-                } else {
-                    alert("ファイルが見つかりませんでした");
-                }
-            });
-            // let result = await fetch('/files/'+currentFileName);
-            // console.log(result);
-            // if (result) {
-            //     if (confirm("ファイルが見つかりました。開きますか？")) {
-            //         console.log("開く");
-            //     }
-            // } else {
-            //     alert("ファイルが見つかりませんでした");
-            // }
-        } catch(e) {
-            console.log(e);
-            alert("検索に失敗しました: "+e);
-        }
     }
 
     async init() {
@@ -227,57 +196,19 @@ class App {
         });
 
         exportButton.addEventListener('click', () => {
-            this.export();
+            const outFileName = fileName.value;
+            const code = this.editor.getValue();
+            File.export(outFileName, code);
         });
 
         saveButton.addEventListener('click', () => {
-            this.save();
+            File.save();
         });
 
         searchButton.addEventListener('click', async() => {
-            await this.searchFile();
+            await File.search(this.editor, fileName.value);
         });    
     }    
-
-    async open(file) {
-        let path = '/files/'+file;
-        let code = (await (await fetch(path)).text(path)).toString();
-
-        console.log(this.editor);
-        this.editor.setValue(code);
-        // const model = this.editor.getModel();
-        // editor.executeEdits('my-source', [{
-        //     range: model.getFullModelRange(),
-        //     text: code,
-        //     forceMoveMarkers: true
-        // }]);
-    }
-
-    save() {
-        // TODO
-    }
-
-    export() {
-        const outFileName = fileName.value;
-        const code = this.editor.getValue();
-
-        if (!(outFileName.includes('.py') || outFileName.includes('.md'))) {
-            console.log("ファイル拡張子は .pyか.mdにしてください");
-            return;
-        }
-        
-        let blob;
-        if (outFileName.includes('.md')) {
-            blob = new Blob([code], { 'type': 'text/plain' })
-        } else {
-            blob = new Blob([code], { 'type': 'text/plain' });
-        }
-
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = outFileName;
-        link.click();
-    }
 }
 
 async function main() {
