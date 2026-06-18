@@ -93,3 +93,13 @@ pre {
   background-color: #fffffe;
   color: #15150F;
 }
+
+table {
+    border-collapse: collapse;
+    /* border: solid 1px black; */
+}
+
+th, td {
+    border-collapse: collapse;
+    border: solid 1px black;
+}
