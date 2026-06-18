@@ -13,15 +13,16 @@ html, body {
   width: 30%;
   height: 30%;
   z-index: 99999;
-  background-color: cornflowerblue;
+  background-color: black;
   transform: translateX(-50%) translateY(-50%);
 
   display: grid;
   text-align: center;
-  border: solid blue 1px;
+  border: solid rgb(255, 255, 255) 1px;
   border-radius: 10%;
   justify-content: center;
   align-items: center;
+  color: white;
 }
 
 .loader {
@@ -29,7 +30,7 @@ html, body {
   aspect-ratio: 1;
   border-radius: 50%;
   border: 8px solid;
-  border-color: #000 #0000;
+  border-color: blanchedalmond black;
   animation: l1 1s infinite;
 }
 @keyframes l1 {to{transform: rotate(.5turn)}}
@@ -79,4 +80,8 @@ main {
 .box {
   width: auto;
   height: auto;
+}
+
+#run {
+  display: none;
 }

@@ -278,7 +278,9 @@ class App {
             this.language = afterLanguage;
 
             if (afterLanguage === 'python') {
-                // TODO
+                runButton.style.display = 'block';
+            } else {
+                runButton.style.display = 'none';
             }
         });
 
