@@ -1,4 +1,8 @@
 export class File {
+    static toPath(fileName) {
+        return '/files/'+fileName;
+    }
+
     static async open(editor, path) {
         let code = (await (await fetch(path)).text(path)).toString();
         editor.setValue(code);

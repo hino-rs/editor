@@ -2,9 +2,9 @@ import { micromark } from 'https://esm.sh/micromark@3?bundle';
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
 import katex from 'https://esm.sh/markdown-it-katex@2';
+// import highlightjs from 'https://esm.sh/markdown-it-highlightjs@4?bundle';
 
 import { File } from '/file.js';
-
 
 const languages = {
     "Markdown": "markdown",
@@ -20,6 +20,8 @@ const colorPaletteLight = {
     "buttonBorder": "#a99985",
     "inputSelectBg": "#555353",
     "inputSelectText": "#f5f1ed",
+    "preBg": "#fffffe",
+    "preText": "#15150F",
 }
 // 252323-70798c-f5f1ed-dad2bc-a99985
 const colorPaletteDark = {
@@ -31,6 +33,8 @@ const colorPaletteDark = {
     "buttonBorder": "#a99985",
     "inputSelectBg": "#f5f1ed",
     "inputSelectText": "#555353",
+    "preBg": "#15150F",
+    "preText": "#fffffe",
 }
 
 const title             = document.getElementById("title");
@@ -80,6 +84,7 @@ class App {
         this.output = "";
         this.errOutput = "";
         this.md = null;
+        this.currentFile = "";
     }
 
     async loadConfig() {
@@ -94,15 +99,19 @@ class App {
         files = JSON.parse(files);
 
         for (let i = 0; i < files.length; i++) {
-            filesSelector.innerHTML += `<option value="${files[i]}">${files[i]}<option>`
+            let fileName = files[i];
+            if ((fileName) && fileName !== null && fileName !== undefined && fileName !== '') {
+                if (fileName === this.currentFile) {
+                    filesSelector.innerHTML += `<option value="${'/files/'+fileName}" selected>${fileName}</option>`;
+                } else {
+                    filesSelector.innerHTML += `<option value="${'/files/'+fileName}">${fileName}</option>`;
+                }
+            }
         }
     }
 
     async init() {
         try {
-            // 登録ファイル読み込みとセレクタ作成
-            await this.loadFiles();
-
             // コンフィグ読み込み
             let config = await this.loadConfig()
             config = await config.json();
@@ -114,14 +123,21 @@ class App {
             this.setOptions();
 
             // コンフィグから最新のファイル名を取得
-            let currentFile = jsonGetSafety(config, "currentFile", "/files/welcome.md", 'any');
+            let currentFile = jsonGetSafety(config, "currentFile", "welcome.md", 'any');
             // もし無名だったら、もしくは拡張子が誤っていたらwelcomeドキュメントに
-            if (currentFile === '' || !currentFile.includes('.md') || !currentFile.includes('.py')) { currentFile = '/files/welcome.md' }
+            if (currentFile === '' || (!currentFile.includes('.md') && !currentFile.includes('.py'))) { 
+                currentFile = 'welcome.md'
+            }
+            let currentFilePath = '/files/' + currentFile;
             // フェッチして文字列へ
-            let initialValue = (await (await fetch(currentFile)).text(currentFile)).toString();
+            let initialValue = (await (await fetch(currentFilePath)).text(currentFilePath)).toString();
             // もしファイルが見つからなかったらwelcomeドキュメントに
-            if (!initialValue) { initialValue = (await (await fetch("/files/welcome.md")).text()).toString(); }
-            
+            if (!initialValue) { 
+                currentFile = 'welcome.md';
+                initialValue = (await (await fetch("/files/welcome.md")).text()).toString(); 
+            }
+            this.currentFile = currentFile;
+
             // モナコエディタ初期化
             await this.initEditor(initialValue, config);
             // pyodide初期化
@@ -132,8 +148,11 @@ class App {
                 breaks: true,
                 linkify: true
             });
-
             this.md.use(katex);
+            // this.md.use(highlightjs);
+
+            // 登録ファイル読み込みとセレクタ作成
+            await this.loadFiles();
 
             // 変更監視とHTML変換起動
             this.markdown();
@@ -170,6 +189,8 @@ class App {
         let buttonBorder;
         let inputSelectBg;
         let inputSelectText;
+        let preBg;
+        let preText;
 
         if (after === "light") {
             titleColor = "black";
@@ -181,6 +202,8 @@ class App {
             buttonBorder = colorPaletteLight["buttonBorder"];
             inputSelectBg = colorPaletteLight["inputSelectBg"];
             inputSelectText = colorPaletteLight["inputSelectText"];
+            preBg = colorPaletteLight["preBg"];
+            preText = colorPaletteLight["preText"];
         } else {
             titleColor = "white";
             headerBg = colorPaletteDark["headerBg"];
@@ -191,6 +214,8 @@ class App {
             buttonBorder = colorPaletteDark["buttonBorder"];
             inputSelectBg = colorPaletteDark["inputSelectBg"];
             inputSelectText = colorPaletteDark["inputSelectText"];
+            preBg = colorPaletteDark["preBg"];
+            preText = colorPaletteDark["preText"];
         }
 
         title.style.color = titleColor;
@@ -209,6 +234,12 @@ class App {
         allInputs.forEach(input => {
             input.style.backgroundColor = inputSelectBg;
             input.style.color = inputSelectText;
+        });
+
+        const allPres           = document.querySelectorAll('pre');
+        allPres.forEach(pre => {
+            pre.style.backgroundColor = preBg;
+            pre.style.color = preText;
         });
     }
 
@@ -304,7 +335,13 @@ class App {
 
         searchButton.addEventListener('click', async() => {
             await File.search(this.editor, fileName.value);
-        });    
+        });
+
+        filesSelector.addEventListener('change', (event) => {
+            if (confirm("ファイルを開きますか？現在の変更は保存されません。")) {
+                File.open(this.editor, event.target.value);
+            }
+        });
     }    
 }
 
@@ -326,7 +363,7 @@ async function main() {
             if (app.language === 'markdown') {
                 app.markdown();
             } else {
-                app.run()
+                app.run();
                 app.writeOutput(app.output);
             }
         });

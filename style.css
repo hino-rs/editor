@@ -85,3 +85,11 @@ main {
 #run {
   display: none;
 }
+
+pre {
+  border: rgb(121, 121, 121) 1px solid;
+  border-radius: 2%;
+  padding: 0.5rem;
+  background-color: #fffffe;
+  color: #15150F;
+}
