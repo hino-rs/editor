@@ -10,6 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "markdown-it": "^14.2.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "markdown-it-tasklist": "^1.1.0",
     "micromark": "^4.0.2",
     "monaco-editor": "^0.53.0",
     "monaco-themes": "^0.4.8"

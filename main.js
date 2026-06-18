@@ -3,6 +3,10 @@ import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
 import katex from 'https://esm.sh/markdown-it-katex@2';
 // import highlightjs from 'https://esm.sh/markdown-it-highlightjs@4?bundle';
+// import tasklist from 'https://esm.sh/markdown-it-tasklist@1bundle';
+// const tasklist = require('markdown-it-tasklist');
+// var taskLists = require('markdown-it-task-lists');
+import taskLists from 'https://esm.sh/markdown-it-task-lists@2?bundle';
 
 import { File } from '/file.js';
 
@@ -150,6 +154,8 @@ class App {
             });
             this.md.use(katex);
             // this.md.use(highlightjs);
+            // this.md.use(tasklist);
+            this.md.use(taskLists, {label: true, labelAfter: true});
 
             // 登録ファイル読み込みとセレクタ作成
             await this.loadFiles();
