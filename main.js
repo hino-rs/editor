@@ -154,10 +154,6 @@ class App {
             this.theme = jsonGetSafety(config, "theme", "dark", ["light", "dark"]);
             this.setTheme();
 
-            // テーマ・言語セレクターをセット
-            loadText.innerText = 'セレクターをセットしよう...';
-            this.setOptions();
-
             // コンフィグから最新のファイル名を取得
             loadText.innerText = 'コンフィグからファイル名を見つけないと...';
             let currentFile = jsonGetSafety(config, "currentFile", "welcome.md", 'any');
@@ -177,6 +173,17 @@ class App {
                 initialValue = (await (await fetch("/files/welcome.md")).text()).toString(); 
             }
             this.currentFile = currentFile;
+
+            // テーマ・言語セレクターをセット
+            loadText.innerText = 'セレクターをセットしよう...';
+            let initialLanguage = (currentFile.includes(".md") ? "Markdown" : "Python");
+            this.setLanguages(initialLanguage);
+
+            if (initialLanguage === 'Python') {
+                runButton.style.display = 'block';
+            } else {
+                runButton.style.display = 'none';
+            }
 
             // モナコエディタ初期化
             loadText.innerText = 'エディタを初期化しよう...';
@@ -237,9 +244,13 @@ class App {
         alert(`${targetPackageName}のインストールが完了しました`);
     }
 
-    setOptions() {
+    setLanguages(defaultLang) {
         for (const language in languages) {
-            languagesSelector.innerHTML += `<option value="${languages[language]}">${language}</option>`;
+            if (language === defaultLang) {
+                languagesSelector.innerHTML += `<option value="${languages[language]}" selected>${language}</option>`;
+            } else {
+                languagesSelector.innerHTML += `<option value="${languages[language]}">${language}</option>`;
+            }
         }
     }
 
