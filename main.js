@@ -1,3 +1,5 @@
+async () => alert('依存関係が原因で、起動時にエラーが発生する場合があります。コンソールを確認してください。')();
+
 import { micromark } from 'https://esm.sh/micromark@3?bundle';
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
@@ -18,8 +20,8 @@ const languages = {
 const colorPaletteLight = {
     "headerBg": "#a99985",
     "headerText": "#252323",
-    "resultBg": "#f5f1ed",
-    "resultText": "#252323",
+    "rightPanelBg": "#f5f1ed",
+    "rightPanelText": "#252323",
     "buttonBg": "#dad2bc",
     "buttonBorder": "#a99985",
     "inputSelectBg": "#555353",
@@ -31,8 +33,8 @@ const colorPaletteLight = {
 const colorPaletteDark = {
     "headerBg": "#675e54",
     "headerText": "#252323",
-    "resultBg": "#252323",
-    "resultText": "#f5f1ed",
+    "rightPanelBg": "#252323",
+    "rightPanelText": "#f5f1ed",
     "buttonBg": "#dad2bc",
     "buttonBorder": "#a99985",
     "inputSelectBg": "#f5f1ed",
@@ -43,7 +45,6 @@ const colorPaletteDark = {
 
 const title             = document.getElementById("title");
 const runButton         = document.getElementById("run");
-const result            = document.getElementById("result");
 const languagesSelector = document.getElementById("languages");
 const themeSelector     = document.getElementById("theme");
 const fileName          = document.getElementById('fileName');
@@ -55,6 +56,8 @@ const allButtons        = document.querySelectorAll('button');
 const allSelects        = document.querySelectorAll('select');
 const allInputs         = document.querySelectorAll('input');
 const filesSelector     = document.getElementById('files');
+const plotMode          = document.getElementById('plot-mode');
+const rightPanel        = document.getElementById('right');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -89,6 +92,8 @@ class App {
         this.errOutput = "";
         this.md = null;
         this.currentFile = "";
+        this.plotMode = false;
+        this.theme = "";
     }
 
     async loadConfig() {
@@ -121,7 +126,8 @@ class App {
             config = await config.json();
             
             // // リザルト画面のテーマ適用
-            this.setTheme(jsonGetSafety(config, "theme", "dark", ["light", "dark"]));
+            this.theme = jsonGetSafety(config, "theme", "dark", ["light", "dark"]);
+            this.setTheme();
 
             // テーマ・言語セレクターをセット
             this.setOptions();
@@ -182,28 +188,37 @@ class App {
     }
 
     writeOutput(output) {
+        const result = document.getElementById("result");
         result.innerText = output;
     }
 
-    setTheme(after) {
+    setTheme() {
+        const after = this.theme;
+        // const result = document.getElementById("result");
+        // const canvasPanel = document.getElementById('canvas');
+        const allPres = document.querySelectorAll('pre');
+
         let titleColor;
         let headerBg;
         let headerText;
-        let resultBg;
-        let resultText;
+        // let resultBg;
+        // let resultText;
         let buttonBg;
         let buttonBorder;
         let inputSelectBg;
         let inputSelectText;
         let preBg;
         let preText;
+        // let canvasBg;
+        let rightPanelBg;
+        let rightPanelText;
 
         if (after === "light") {
             titleColor = "black";
             headerBg = colorPaletteLight["headerBg"];
             headerText = colorPaletteLight["headerText"];
-            resultBg = colorPaletteLight["resultBg"];
-            resultText = colorPaletteLight["resultText"];
+            rightPanelBg = colorPaletteLight["rightPanelBg"];
+            rightPanelText = colorPaletteLight["rightPanelText"];
             buttonBg = colorPaletteLight["buttonBg"];
             buttonBorder = colorPaletteLight["buttonBorder"];
             inputSelectBg = colorPaletteLight["inputSelectBg"];
@@ -214,8 +229,8 @@ class App {
             titleColor = "white";
             headerBg = colorPaletteDark["headerBg"];
             headerText = colorPaletteDark["headerText"];
-            resultBg = colorPaletteDark["resultBg"];
-            resultText = colorPaletteDark["resultText"];
+            rightPanelBg = colorPaletteDark["rightPanelBg"];
+            rightPanelText = colorPaletteDark["rightPanelText"];
             buttonBg = colorPaletteDark["buttonBg"];
             buttonBorder = colorPaletteDark["buttonBorder"];
             inputSelectBg = colorPaletteDark["inputSelectBg"];
@@ -226,9 +241,16 @@ class App {
 
         title.style.color = titleColor;
         header.style.backgroundColor = headerBg;
-        header.style.color = resultText;
-        result.style.backgroundColor = resultBg;
-        result.style.color = resultText;
+        header.style.color = rightPanelText;
+        rightPanel.style.backgroundColor = rightPanelBg;
+        rightPanel.style.color = rightPanelText;
+        // if (result) {
+        //     result.style.backgroundColor = resultBg;
+        //     result.style.color = resultText;
+        // }
+        // if (canvasPanel) {
+        //     canvasPanel.style.backgroundColor = resultBg;
+        // }
         allButtons.forEach(button => {
             button.style.backgroundColor = buttonBg;
             button.style.borderColor = buttonBorder;
@@ -242,7 +264,6 @@ class App {
             input.style.color = inputSelectText;
         });
 
-        const allPres           = document.querySelectorAll('pre');
         allPres.forEach(pre => {
             pre.style.backgroundColor = preBg;
             pre.style.color = preText;
@@ -257,6 +278,12 @@ class App {
                 stdout: (out) => {this.output += out+"\n"; console.log(`>> ${out}`)},
                 stderr: (out) => {this.output =+ out+"\n"; console.log(`>> ${out}`)}
             });
+            // await this.python.loadPackage("micropip");
+            // const micropip = this.python.pyimport("micropip");
+            // await micropip.install("matplotlib");
+            await this.python.loadPackage("matplotlib");
+            await this.python.runPythonAsync("import matplotlib");
+            console.log("matplotlibインストール完了");
         } catch(e) {
             console.error(e);
         }
@@ -293,23 +320,48 @@ class App {
     }
 
     parseMarkdown() {
+        const result = document.getElementById("result");
         const code = this.editor.getValue();
         const htmlContent = this.md.render(code);
         result.innerHTML = htmlContent;
     }
 
     // Python実行
-    run() {
+    async run() {
         if (!this.editor || !this.python) {
             console.warn("準備ができていません")
             return;
         }
         this.outputClear();
         const code = this.editor.getValue();
-        this.python.runPython(code);
+        const result = this.python.runPython(code);
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        console.log(canvas, canvas, ctx, img);
+        img.onload = () => {
+            console.log("描画開始");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            console.log("描画完了");
+        };
+        img.src = "data:image/png;base64,"+result;
     }
 
     bootController() {
+        plotMode.addEventListener('change', () => {
+            if (plotMode.checked) {
+                console.log("プロットとコンソール出力は同時に行えないため注意してください。");
+                rightPanel.innerHTML = `<canvas id="canvas"></canvas>`;
+                this.setTheme();
+            } else {
+                rightPanel.innerHTML = `<div id="result">結果はここに出力されます</div>`;
+                this.setTheme();
+            }
+        })
+        
         languagesSelector.addEventListener('change', (event) => {
             let afterLanguage = event.target.value;
             monaco.editor.setModelLanguage(this.editor.getModel(), event.target.value);
@@ -324,8 +376,9 @@ class App {
 
         themeSelector.addEventListener('change', (event) => {
             let after = event.target.value;
+            this.theme = after;
 
-            this.setTheme(after);
+            this.setTheme();
 
             if (after === "dark") {
                 monaco.editor.setTheme("vs-dark");

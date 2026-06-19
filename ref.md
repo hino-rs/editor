@@ -13,3 +13,4 @@
 - https://css-loaders.com/spinner/
 - https://pyodide.org/en/stable/usage/loading-packages.html
 - https://qiita.com/kyamnn/items/2f3d8081dbbf5e12928f
+- https://pyodide.org/en/stable/usage/packages-in-pyodide.html

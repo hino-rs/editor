@@ -66,15 +66,11 @@ main {
 #code-editor {
   flex: 1;
   overflow: auto;
+  width: 100%;
 }
 
 #result {
   flex: 1;
-  overflow: auto;
-  background-color: #F0F0E0;
-  color: #303030;
-  border-left: 1px #70798c solid;
-  padding: 1rem;
 }
 
 .box {
@@ -103,3 +99,16 @@ th, td {
     border-collapse: collapse;
     border: solid 1px black;
 }
+
+#right {
+  height: 100%;
+  width: 50%;
+
+  overflow: auto;
+  background-color: #F0F0E0;
+  color: #303030;
+  border-left: 1px #70798c solid;
+  padding: 1rem;
+  height: 100%;
+}
+

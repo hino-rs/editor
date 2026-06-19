@@ -17,7 +17,12 @@
       <span id="title">インスタントノート</span>
       
       <button id="run">Run</button>
-      
+
+      <div class="box">
+        プロットモード
+        <input type="checkbox" id="plot-mode">
+      </div>
+
       <div class="box">
         ファイル
         <select id="files"></select>
@@ -48,7 +53,9 @@
 
     <main>
       <div id="code-editor"></div>
-      <div id="result">結果はここに出力されます</div>
+      <div id="right">
+        <div id="result">結果はここに出力されます</div>
+      </div>
     </main>
 
     <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
