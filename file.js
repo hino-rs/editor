@@ -1,13 +1,18 @@
+// ファイル操作関係
+
 export class File {
+    // ファイル名をパスに加工
     static toPath(fileName) {
         return '/files/'+fileName;
     }
 
+    // ファイルを読み取ってコードエディタに入れる
     static async open(editor, path) {
         let code = (await (await fetch(path)).text(path)).toString();
         editor.setValue(code);
     }
 
+    // ファイル検索
     static async search(editor, fileName) {
         if (fileName === '' || fileName === undefined || fileName === null) { alert("ファイル名が空です。"); return; }
         const path = '/files/'+fileName;
@@ -30,6 +35,7 @@ export class File {
         }
     }
 
+    // ダウンロードボ
     static download(outFileName, code) {
         if (!(outFileName.includes('.py') || outFileName.includes('.md'))) {
             console.log("ファイル拡張子は .pyか.mdにしてください");

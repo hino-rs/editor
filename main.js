@@ -5,21 +5,19 @@
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
 import katex from 'https://esm.sh/markdown-it-katex@2';
-// import highlightjs from 'https://esm.sh/markdown-it-highlightjs@4?bundle';
-// import tasklist from 'https://esm.sh/markdown-it-tasklist@1bundle';
-// const tasklist = require('markdown-it-tasklist');
-// var taskLists = require('markdown-it-task-lists');
 import taskLists from 'https://esm.sh/markdown-it-task-lists@2?bundle';
 
 import { File } from '/file.js';
 
 let packagesInstalledMap = {};
 
+// 提供するシンタックスハイライト
 const languages = {
     "Markdown": "markdown",
     "Python": "python",
 };
 
+// ライトテーマのカラーパレット
 const colorPaletteLight = {
     "headerBg": "#a99985",
     "headerText": "#252323",
@@ -32,7 +30,8 @@ const colorPaletteLight = {
     "preBg": "#fffffe",
     "preText": "#15150F",
 };
-// 252323-70798c-f5f1ed-dad2bc-a99985
+
+// ダークテーマのカラーパレット
 const colorPaletteDark = {
     "headerBg": "#675e54",
     "headerText": "#252323",
@@ -46,6 +45,7 @@ const colorPaletteDark = {
     "preText": "#fffffe",
 };
 
+// Pyodideの対応しているパッケージ群
 const packages = {
     "matplotlib": "3.10.8",
     "numpy": "2.4.3",
@@ -57,6 +57,7 @@ const packages = {
     "sympy": "1.14.0",
 };
 
+// --- getElement ---
 const title                 = document.getElementById("title");
 const runButton             = document.getElementById("run");
 const languagesSelector     = document.getElementById("languages");
@@ -116,6 +117,7 @@ class App {
         this.theme = "";
     }
 
+    // コンフィグファイルを読むだけ
     async loadConfig() {
         return await fetch('config.json');
     }
@@ -139,6 +141,7 @@ class App {
         }
     }
 
+    // 初期化
     async init() {
         try {
             // コンフィグ読み込み
@@ -190,8 +193,7 @@ class App {
             });
             loadText.innerText = 'LaTeXを使えるようにしよう...';
             this.md.use(katex);
-            // this.md.use(highlightjs);
-            // this.md.use(tasklist);
+            
             loadText.innerText = 'チェックリストを使えるようにしよう...';
             this.md.use(taskLists, {label: true, labelAfter: true});
 
@@ -212,11 +214,11 @@ class App {
 
             loadText.innerText = '終わったー';
         } catch (e) {
-            // location.reload();
             console.error(e);
         }
     }
 
+    // パッケージをインストールする
     async installPackage() {
         let packagesArr = Object.keys(packages);
         const targetPackageName = document.getElementById('target-package-name').value;
@@ -246,11 +248,13 @@ class App {
         this.errOutput = "";
     }
 
+    // リザルト画面に標準出力を書き込み
     writeOutput(output) {
         const result = document.getElementById("result");
         result.innerText = output;
     }
 
+    // パッケージのセレクターなど
     setPackagesList() {
         packagesList.innerHTML = "";
         let installed = this.python.loadedPackages;
@@ -273,22 +277,17 @@ class App {
 
     setTheme() {
         const after = this.theme;
-        // const result = document.getElementById("result");
-        // const canvasPanel = document.getElementById('canvas');
         const allPres = document.querySelectorAll('pre');
 
         let titleColor;
         let headerBg;
         let headerText;
-        // let resultBg;
-        // let resultText;
         let buttonBg;
         let buttonBorder;
         let inputSelectBg;
         let inputSelectText;
         let preBg;
         let preText;
-        // let canvasBg;
         let rightPanelBg;
         let rightPanelText;
 
@@ -323,13 +322,7 @@ class App {
         header.style.color = rightPanelText;
         rightPanel.style.backgroundColor = rightPanelBg;
         rightPanel.style.color = rightPanelText;
-        // if (result) {
-        //     result.style.backgroundColor = resultBg;
-        //     result.style.color = resultText;
-        // }
-        // if (canvasPanel) {
-        //     canvasPanel.style.backgroundColor = resultBg;
-        // }
+
         allButtons.forEach(button => {
             button.style.backgroundColor = buttonBg;
             button.style.borderColor = buttonBorder;
@@ -357,11 +350,9 @@ class App {
                 stdout: (out) => {this.output += out+"\n"; console.log(`>> ${out}`)},
                 stderr: (out) => {this.output =+ out+"\n"; console.log(`>> ${out}`)}
             });
-            // await this.python.loadPackage("micropip");
-            // const micropip = this.python.pyimport("micropip");
-            // await micropip.install("matplotlib");
             loadText.innerText = 'matplotlibだけ入れておこう...';
             await this.python.loadPackage("matplotlib");
+            
             loadText.innerText = 'matplotlibだけ先にimportしておこう...';
             await this.python.runPythonAsync("import matplotlib");
         } catch(e) {
@@ -391,6 +382,7 @@ class App {
         });
     }
 
+    // エディタ監視とMarkdownパース呼び出し
     markdown() {
         if (this.editor) {
             this.editor.onDidChangeModelContent((event) => {
@@ -399,6 +391,7 @@ class App {
         }
     }
 
+    // Markdownパース
     parseMarkdown() {
         const result = document.getElementById("result");
         const code = this.editor.getValue();
@@ -415,21 +408,26 @@ class App {
         this.outputClear();
         const code = this.editor.getValue();
         const result = this.python.runPython(code);
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-        const img = new Image();
-        console.log(canvas, canvas, ctx, img);
-        img.onload = () => {
-            console.log("描画開始");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-            console.log("描画完了");
-        };
-        img.src = "data:image/png;base64,"+result;
+
+        // --- plot ---
+        if (this.plotMode) {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            const img = new Image();
+            console.log(canvas, canvas, ctx, img);
+            img.onload = () => {
+                console.log("描画開始");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                console.log("描画完了");
+            };
+            img.src = "data:image/png;base64,"+result;
+        }
     }
 
+    // ボタン等のイベントリスナーをセット
     bootController() {
         installerBatu.addEventListener('click', () => {
             packageInstaller.style.display = 'none';
@@ -445,6 +443,7 @@ class App {
         })
 
         plotMode.addEventListener('change', () => {
+            this.plotMode = plotMode.checked;
             if (plotMode.checked) {
                 console.log("プロットとコンソール出力は同時に行えないため注意してください。");
                 rightPanel.innerHTML = `<canvas id="canvas"></canvas>`;
