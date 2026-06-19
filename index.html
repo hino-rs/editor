@@ -13,6 +13,15 @@
       <div class="loader"></div>
     </div>
 
+    <div id="package-installer">
+      <header id="installer-header">
+        <input type="text" id="target-package-name">
+        <button id="package-install-send-button">インストール</button>
+        <button id="installer-batu"><img src="batu.svg" width="15" height="15"></button>
+      </header>
+      <ul id="packages-list"></ul>
+    </div>
+
     <header id="header">
       <span id="title">インスタントノート</span>
       
@@ -21,6 +30,10 @@
       <div class="box">
         プロットモード
         <input type="checkbox" id="plot-mode">
+      </div>
+
+      <div class="box">
+        <button id="package-install">パッケージ</button>
       </div>
 
       <div class="box">

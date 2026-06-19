@@ -1,6 +1,5 @@
 async () => alert('依存関係が原因で、起動時にエラーが発生する場合があります。コンソールを確認してください。')();
 
-import { micromark } from 'https://esm.sh/micromark@3?bundle';
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
 import katex from 'https://esm.sh/markdown-it-katex@2';
@@ -11,6 +10,10 @@ import katex from 'https://esm.sh/markdown-it-katex@2';
 import taskLists from 'https://esm.sh/markdown-it-task-lists@2?bundle';
 
 import { File } from '/file.js';
+
+let packagesInstalledMap = {
+    
+}
 
 const languages = {
     "Markdown": "markdown",
@@ -28,7 +31,7 @@ const colorPaletteLight = {
     "inputSelectText": "#f5f1ed",
     "preBg": "#fffffe",
     "preText": "#15150F",
-}
+};
 // 252323-70798c-f5f1ed-dad2bc-a99985
 const colorPaletteDark = {
     "headerBg": "#675e54",
@@ -41,23 +44,39 @@ const colorPaletteDark = {
     "inputSelectText": "#555353",
     "preBg": "#15150F",
     "preText": "#fffffe",
-}
+};
 
-const title             = document.getElementById("title");
-const runButton         = document.getElementById("run");
-const languagesSelector = document.getElementById("languages");
-const themeSelector     = document.getElementById("theme");
-const fileName          = document.getElementById('fileName');
-const downloadButton    = document.getElementById('download');
-const searchButton      = document.getElementById('search');
-const header            = document.getElementById('header');
-const preparation       = document.getElementById('preparation');
-const allButtons        = document.querySelectorAll('button');
-const allSelects        = document.querySelectorAll('select');
-const allInputs         = document.querySelectorAll('input');
-const filesSelector     = document.getElementById('files');
-const plotMode          = document.getElementById('plot-mode');
-const rightPanel        = document.getElementById('right');
+const packages = {
+    "matplotlib": "3.10.8",
+    "numpy": "2.4.3",
+    "pandas": "3.0.2",
+    "requests": "2.33.1",
+    "scipy": "1.17.1",
+    "fastapi": "0.136.1",
+    "scikit-learn": "1.8.0",
+    "sympy": "1.14.0",
+};
+
+const title                 = document.getElementById("title");
+const runButton             = document.getElementById("run");
+const languagesSelector     = document.getElementById("languages");
+const themeSelector         = document.getElementById("theme");
+const fileName              = document.getElementById('fileName');
+const downloadButton        = document.getElementById('download');
+const searchButton          = document.getElementById('search');
+const header                = document.getElementById('header');
+const preparation           = document.getElementById('preparation');
+const allButtons            = document.querySelectorAll('button');
+const allSelects            = document.querySelectorAll('select');
+const allInputs             = document.querySelectorAll('input');
+const filesSelector         = document.getElementById('files');
+const plotMode              = document.getElementById('plot-mode');
+const rightPanel            = document.getElementById('right');
+const packageInstallBtn     = document.getElementById('package-install');
+const packageInstaller      = document.getElementById('package-installer');
+const packagesList          = document.getElementById('packages-list');
+const packageInstallSendBtn = document.getElementById('package-install-send-button');
+const installerBatu         = document.getElementById('installer-batu');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -166,6 +185,9 @@ class App {
             // 登録ファイル読み込みとセレクタ作成
             await this.loadFiles();
 
+            // パッケージリスト
+            this.setPackagesList();
+
             // 変更監視とHTML変換起動
             this.markdown();
             // 操作系の監視起動
@@ -174,6 +196,24 @@ class App {
             // location.reload();
             console.error(e);
         }
+    }
+
+    async installPackage() {
+        let packagesArr = Object.keys(packages);
+        const targetPackageName = document.getElementById('target-package-name').value;
+
+        if (!packagesArr.includes(targetPackageName)) {
+            alert("非対応のパッケージです");
+            return;
+        }
+
+        if (packagesInstalledMap[targetPackageName] === true) {
+            alert("インストール済みです");
+            return;
+        }
+    
+        await this.python.loadPackage(targetPackageName);
+        alert(`${targetPackageName}のインストールが完了しました`);
     }
 
     setOptions() {
@@ -190,6 +230,26 @@ class App {
     writeOutput(output) {
         const result = document.getElementById("result");
         result.innerText = output;
+    }
+
+    setPackagesList() {
+        packagesList.innerHTML = "";
+        let installed = this.python.loadedPackages;
+        installed = Object.keys(installed);
+        console.log(installed);
+
+        for (let pkg in packages) {
+            let status = '未インストール';
+            if (installed.includes(pkg)) {
+                status = 'インストール済み';
+            }
+            packagesInstalledMap[pkg] = (status === '未インストール') ? false : true;
+            packagesList.innerHTML += `
+                <option value=${pkg}>
+                    ${pkg} v${packages[pkg]} - ${status}
+                </option>
+            `;
+        }
     }
 
     setTheme() {
@@ -351,6 +411,19 @@ class App {
     }
 
     bootController() {
+        installerBatu.addEventListener('click', () => {
+            packageInstaller.style.display = 'none';
+        })
+
+        packageInstallBtn.addEventListener('click', () => {
+            packageInstaller.style.display = 'block';
+        })
+
+        packageInstallSendBtn.addEventListener('click', async () => {
+            await this.installPackage();
+            this.setPackagesList();
+        })
+
         plotMode.addEventListener('change', () => {
             if (plotMode.checked) {
                 console.log("プロットとコンソール出力は同時に行えないため注意してください。");
@@ -409,7 +482,6 @@ async function main() {
     let app = new App();
     try {
         await app.init();
-        app.bootController();
 
         // 初期値ではonDidChangeModelContentが走らないので
         if (app.editor) {

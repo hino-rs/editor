@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "monaco-editor": "^0.53.0",
+    "monaco-editor": "^0.50.0",
     "monaco-themes": "^0.4.8"
   }
 }
