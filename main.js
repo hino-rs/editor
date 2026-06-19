@@ -1,5 +1,5 @@
 (async () => {
-    alert('依存関係が原因で、起動時にエラーが発生する場合があります。コンソールを確認してください。')
+    alert('依存関係が原因で、起動時にエラーが発生する可能性があります。コンソールを確認してください。\n\n Uncaught TypeError: Property description must be an object: undefined at defineProperty (<anonymous>)\n\nというエラーです。')
 })();
 
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
