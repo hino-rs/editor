@@ -12,7 +12,7 @@ import { File } from '/file.js';
 
 const languages = {
     "Markdown": "markdown",
-    "Python3": "python",
+    "Python": "python",
 };
 
 const colorPaletteLight = {
@@ -255,7 +255,7 @@ class App {
         try {
             this.python = await loadPyodide({
                 stdout: (out) => {this.output += out+"\n"; console.log(`>> ${out}`)},
-                stderr: (out) => {this.errOutput =+ out+"\n"; console.log(`>> ${out}`)}
+                stderr: (out) => {this.output =+ out+"\n"; console.log(`>> ${out}`)}
             });
         } catch(e) {
             console.error(e);
@@ -304,6 +304,7 @@ class App {
             console.warn("準備ができていません")
             return;
         }
+        this.outputClear();
         const code = this.editor.getValue();
         this.python.runPython(code);
     }

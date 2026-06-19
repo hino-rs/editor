@@ -11,3 +11,5 @@
 - https://qiita.com/SeiuchiAzarashi/items/918daaa3aca55830ef32
 - https://office-obata.com/report/memorandum/post-5731/
 - https://css-loaders.com/spinner/
+- https://pyodide.org/en/stable/usage/loading-packages.html
+- https://qiita.com/kyamnn/items/2f3d8081dbbf5e12928f
