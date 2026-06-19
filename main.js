@@ -1,4 +1,6 @@
-async () => alert('依存関係が原因で、起動時にエラーが発生する場合があります。コンソールを確認してください。')();
+(async () => {
+    alert('依存関係が原因で、起動時にエラーが発生する場合があります。コンソールを確認してください。')
+})();
 
 import { parseTmTheme } from 'https://esm.sh/monaco-themes';
 import MarkdownIt from 'https://esm.sh/markdown-it@14?bundle';
@@ -11,9 +13,7 @@ import taskLists from 'https://esm.sh/markdown-it-task-lists@2?bundle';
 
 import { File } from '/file.js';
 
-let packagesInstalledMap = {
-    
-}
+let packagesInstalledMap = {};
 
 const languages = {
     "Markdown": "markdown",
@@ -77,6 +77,7 @@ const packageInstaller      = document.getElementById('package-installer');
 const packagesList          = document.getElementById('packages-list');
 const packageInstallSendBtn = document.getElementById('package-install-send-button');
 const installerBatu         = document.getElementById('installer-batu');
+const loadText              = document.getElementById('load-text');
 
 // unwrap_or的な
 function jsonGetSafety(
@@ -141,57 +142,75 @@ class App {
     async init() {
         try {
             // コンフィグ読み込み
-            let config = await this.loadConfig()
+            loadText.innerText = 'コンフィグを読み込もう...';
+            let config = await this.loadConfig();
             config = await config.json();
             
-            // // リザルト画面のテーマ適用
+            // テーマ適用
+            loadText.innerText = 'テーマを適用しよう...';
             this.theme = jsonGetSafety(config, "theme", "dark", ["light", "dark"]);
             this.setTheme();
 
             // テーマ・言語セレクターをセット
+            loadText.innerText = 'セレクターをセットしよう...';
             this.setOptions();
 
             // コンフィグから最新のファイル名を取得
+            loadText.innerText = 'コンフィグからファイル名を見つけないと...';
             let currentFile = jsonGetSafety(config, "currentFile", "welcome.md", 'any');
             // もし無名だったら、もしくは拡張子が誤っていたらwelcomeドキュメントに
             if (currentFile === '' || (!currentFile.includes('.md') && !currentFile.includes('.py'))) { 
+                loadText.innerText = '変なファイル名...';
                 currentFile = 'welcome.md'
             }
             let currentFilePath = '/files/' + currentFile;
             // フェッチして文字列へ
+            loadText.innerText = 'ファイルの内容を読もう...';
             let initialValue = (await (await fetch(currentFilePath)).text(currentFilePath)).toString();
             // もしファイルが見つからなかったらwelcomeドキュメントに
             if (!initialValue) { 
+                loadText.innerText = 'ファイルが見つからなかった...';
                 currentFile = 'welcome.md';
                 initialValue = (await (await fetch("/files/welcome.md")).text()).toString(); 
             }
             this.currentFile = currentFile;
 
             // モナコエディタ初期化
+            loadText.innerText = 'エディタを初期化しよう...';
             await this.initEditor(initialValue, config);
             // pyodide初期化
+            loadText.innerText = 'Pythonエンジンを初期化しよう...';
             await this.initPython();
             
             // markdown-it初期化
+            loadText.innerText = 'Markdownエンジンを初期化しよう...';
             this.md = MarkdownIt({
                 breaks: true,
                 linkify: true
             });
+            loadText.innerText = 'LaTeXを使えるようにしよう...';
             this.md.use(katex);
             // this.md.use(highlightjs);
             // this.md.use(tasklist);
+            loadText.innerText = 'チェックリストを使えるようにしよう...';
             this.md.use(taskLists, {label: true, labelAfter: true});
 
             // 登録ファイル読み込みとセレクタ作成
+            loadText.innerText = 'ファイルは何があるんだろう？...';
             await this.loadFiles();
 
             // パッケージリスト
+            loadText.innerText = '使えるパッケージを選べるようにしよう...';
             this.setPackagesList();
 
             // 変更監視とHTML変換起動
+            loadText.innerText = 'Markdownエンジンを起動しよう...';
             this.markdown();
             // 操作系の監視起動
+            loadText.innerText = 'addEventListenerを登録しないと...';
             this.bootController();
+
+            loadText.innerText = '終わったー';
         } catch (e) {
             // location.reload();
             console.error(e);
@@ -341,9 +360,10 @@ class App {
             // await this.python.loadPackage("micropip");
             // const micropip = this.python.pyimport("micropip");
             // await micropip.install("matplotlib");
+            loadText.innerText = 'matplotlibだけ入れておこう...';
             await this.python.loadPackage("matplotlib");
+            loadText.innerText = 'matplotlibだけ先にimportしておこう...';
             await this.python.runPythonAsync("import matplotlib");
-            console.log("matplotlibインストール完了");
         } catch(e) {
             console.error(e);
         }

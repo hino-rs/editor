@@ -15,8 +15,10 @@ html, body {
   z-index: 99999;
   background-color: black;
   transform: translateX(-50%) translateY(-50%);
+  flex-direction: column;
+  gap: 3rem;
 
-  display: grid;
+  display: flex;
   text-align: center;
   border: solid rgb(255, 255, 255) 1px;
   border-radius: 10%;
